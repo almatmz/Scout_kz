@@ -1,119 +1,137 @@
-⚽ Scout.kz
+# 🌍 Scout.kz
 
-A football scouting platform for Kazakhstan, designed to connect players, parents, and scouts.
-Players can create detailed profiles, upload videos, and showcase their skills. Scouts and coaches can explore players, rate them, and provide feedback — helping discover new football talent across the country.
-
-
-🛠 Tech Stack
-
-Backend: Node.js, Express.js, PostgreSQL, Cloudinary, JWT, Multer
-Frontend: React.js, React Router, Tailwind CSS, Axios
-Database: PostgreSQL (local or Supabase/Heroku/Railway)
-Deployment: Railway/Render/Heroku (backend), Vercel/Netlify (frontend)
+**A modern web platform for scouting talents and opportunities.**  
 
 
-📱 Features
+---
 
-Player & Scout authentication (JWT)
+## 🚀 Overview  
 
-Player profile creation & editing
+Scout.kz is a **full-stack scouting platform** that connects players, scouts, and coaches.  
+It provides tools for **profile creation, video uploads, ratings, and talent discovery**.  
 
-Video upload to Cloudinary (100MB limit)
+The system is built with a **Node+Express backend**, **PostgreSQL database**, and a **React + Tailwind CSS frontend**.  
 
-Ratings system (Speed, Dribbling, Passing, Shooting, Defending)
+---
 
-Advanced player search (city, position, age)
+## 📱 Features Overview  
 
-Role-based access: Player, Parent, Scout, Admin (future)
+### 👥 User Roles & Permissions  
 
-Responsive Tailwind UI
+- **Player**: Create profile, upload videos, view ratings  
+- **Scout/Coach**: View players, rate players, search/filter  
+- **Admin**: Full access *(future feature)*  
 
-📡 API Endpoints
+### ⚡ Core Functionality  
 
-Auth
+✅ JWT-based authentication  
+✅ Phone number registration/login  
+✅ Player profile creation/editing  
+✅ Video upload to **Cloudinary**  
+✅ Rating system (1–10 scale)  
+✅ Advanced search and filtering  
+✅ Responsive design  
+✅ Real-time feedback  
+✅ File upload validation  
 
-POST /auth/register – Register user
+---
 
-POST /auth/login – Login user
+## 🔌 API Endpoints  
 
-Players
+**Auth**  
+- `POST /auth/register` – User registration  
+- `POST /auth/login` – User login  
 
-POST /players/profile – Create profile
+**Players**  
+- `GET/POST /players/profile` – Player profile management  
+- `GET /players` – List players (with filters)  
+- `GET /players/:id` – Get specific player  
 
-GET /players/:id – Get player details
+**Videos**  
+- `POST /videos/upload` – Upload video  
+- `GET /videos/my-videos` – Get user’s videos  
+- `GET /videos/player/:id` – Get player’s videos  
 
-GET /players – List players with filters
+**Ratings**  
+- `POST /ratings` – Create/update rating  
+- `GET /ratings/player/:id` – Get player ratings  
 
-Videos
+---
 
-POST /videos/upload – Upload video
+## 🛡️ Security Features  
 
-GET /videos/player/:id – Get player videos
+- 🔑 JWT token authentication  
+- 🔒 Password hashing with **bcrypt**  
+- 📝 Input validation with **Joi**  
+- ⏱️ Rate limiting  
+- 🌍 CORS configuration  
+- 🛡️ SQL injection prevention  
+- 📂 File upload validation  
+- 🪖 Helmet security headers  
 
-Ratings
+---
 
-POST /ratings – Add rating
+## 🧪 Testing the Application  
 
-GET /ratings/player/:id – Get ratings
+### 1. Register Users  
+- Go to `/register`  
+- Create a **player account**  
+- Create a **scout/coach account**  
+
+### 2. Create Player Profile  
+- Login as **player**  
+- Go to `/profile`  
+- Fill out profile information  
+
+### 3. Upload Videos  
+- Go to `/upload-video`  
+- Upload a video file (max **100MB**)  
+- Add title and description  
+
+### 4. Scout/Coach Features  
+- Login as **scout/coach**  
+- Go to `/players` to browse players  
+- Click on a player to view details  
+- Rate players using the **rating system**  
+- Filter players by **position, city, age**  
+
+---
+
+## 🎯 Key Features Explained  
+
+### 🔐 Authentication System  
+- Phone number + password authentication  
+- JWT tokens with 7-day expiration  
+- Role-based access control  
+- Persistent login sessions  
+
+### 🏃 Player Profile System  
+- Comprehensive profile with **physical stats**  
+- Position, experience, club information  
+- Bio section for personal description  
+- Real-time profile updates  
+
+### 🎥 Video Upload System  
+- Cloudinary integration for **reliable storage**  
+- File size validation (100MB limit)  
+- Video format validation  
+- Max **2 videos per player**  
+- Progress tracking during upload  
+
+### ⭐ Rating System  
+- 5 skill categories: **Speed, Dribbling, Passing, Shooting, Defending**  
+- Overall rating (1–10 scale)  
+- Comments section for detailed feedback  
+- Average rating calculation  
+- Rating history tracking  
+
+### 🔎 Search & Filter System  
+- Text search by player name  
+- Filter by **city, position, age range**  
+- Real-time filtering  
+- Pagination support  
+- Sort by rating  
+
+---
 
 
-
-🔐 Security Features
-
-JWT authentication
-
-Password hashing (bcrypt)
-
-Request rate limiting
-
-Input validation with Joi
-
-SQL injection prevention
-
-Secure file upload validation
-
-Helmet security headers
-
-🧩 Troubleshooting
-
-413 Payload Too Large:
-
-Check Cloudinary file size limits
-
-Use eager_async=true for large uploads
-
-Invalid Integer Error:
-
-Ensure correct data types in DB (age, height, etc. must be integers)
-
-Frontend Build Not Showing Styles:
-
-Check tailwind.config.js content paths
-
-Ensure index.css includes Tailwind directives
-
-📈 Future Enhancements
-
-AI-based video analysis
-
-Player comparison tools
-
-Tournament management
-
-Mobile app (React Native)
-
-Payment integration & subscriptions
-
-Multi-language support
-
-📞 Support & Resources
-
-PostgreSQL Docs
-
-Express.js
-
-React
-
-Tailwind CSS
-
-Cloudinary
