@@ -12,22 +12,11 @@ const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 app.set("trust proxy", 1);
-
 // Security middleware
 app.use(helmet());
-
-// ✅ Allowed frontend origins
-const allowedOrigins = ["http://localhost:3000", "https://scout-kz.vercel.app"];
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow mobile apps / curl
-      if (allowedOrigins.indexOf(origin) === -1) {
-        return callback(new Error("CORS policy: Not allowed by CORS"), false);
-      }
-      return callback(null, true);
-    },
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
     credentials: true,
   })
 );
@@ -59,5 +48,5 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
