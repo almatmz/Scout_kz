@@ -102,3 +102,5 @@ router.post("/upload", auth, upload.single("video"), async (req, res) => {
     res.status(500).json({ error: "Ошибка при загрузке видео" });
   }
 });
+
+module.exports = router;
