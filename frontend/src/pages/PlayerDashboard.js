@@ -1,244 +1,145 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import api from "../services/api";
-import { User, Upload, Play, Star } from "lucide-react";
+
+const StatCard = ({ title, value, description, icon, accent }) => (
+  <div className="card flex flex-col justify-between gap-3">
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2 text-slate-400">
+        {icon && <span className="text-xl">{icon}</span>}
+        <span className="text-sm font-medium">{title}</span>
+      </div>
+      {accent && (
+        <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+          {accent}
+        </span>
+      )}
+    </div>
+    <div>
+      <p className="text-2xl font-semibold text-slate-50">{value}</p>
+      {description && (
+        <p className="mt-1 text-xs text-slate-400">{description}</p>
+      )}
+    </div>
+  </div>
+);
 
 const PlayerDashboard = () => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState(null);
-  const [videos, setVideos] = useState([]);
-  const [ratings, setRatings] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      const [profileRes, videosRes] = await Promise.all([
-        api.get("/players/profile"),
-        api.get("/videos/my-videos"),
-      ]);
-
-      setProfile(profileRes.data);
-      setVideos(videosRes.data);
-
-      if (profileRes.data?.id) {
-        const ratingsRes = await api.get(
-          `/ratings/player/${profileRes.data.id}`
-        );
-        setRatings(ratingsRes.data);
-      }
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-    } finally {
-      setLoading(false);
-    }
+  // TODO: реальные данные с API
+  const stats = {
+    profileCompleted: false,
+    videosCount: 0,
+    averageRating: null,
+    ratingsCount: 0,
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
-  }
-
-  const avgRating =
-    ratings.length > 0
-      ? (
-          ratings.reduce((sum, r) => sum + r.overall_rating, 0) / ratings.length
-        ).toFixed(1)
-      : 0;
-
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Добро пожаловать, {user.full_name}!
-        </h1>
-        <p className="text-gray-600 mt-2">Управляй своим профилем и видео</p>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Quick Stats */}
-        <div className="lg:col-span-3">
-          <div className="grid md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center">
-                <User className="w-8 h-8 text-primary-600" />
-                <div className="ml-4">
-                  <p className="text-sm text-gray-600">Профиль</p>
-                  <p className="text-xl font-semibold">
-                    {profile ? "Заполнен" : "Не заполнен"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center">
-                <Play className="w-8 h-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="text-sm text-gray-600">Видео</p>
-                  <p className="text-xl font-semibold">{videos.length}/2</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center">
-                <Star className="w-8 h-8 text-yellow-600" />
-                <div className="ml-4">
-                  <p className="text-sm text-gray-600">Средний рейтинг</p>
-                  <p className="text-xl font-semibold">{avgRating}/10</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center">
-                <User className="w-8 h-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-sm text-gray-600">Оценки</p>
-                  <p className="text-xl font-semibold">{ratings.length}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Profile Section */}
-        <div className="lg:col-span-2">
-          <div className="card mb-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Профиль игрока</h2>
-              <Link to="/profile" className="btn-primary">
-                {profile ? "Редактировать" : "Создать профиль"}
-              </Link>
-            </div>
-
-            {profile ? (
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Возраст</p>
-                  <p className="font-medium">{profile.age} лет</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Город</p>
-                  <p className="font-medium">{profile.city}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Позиция</p>
-                  <p className="font-medium">{profile.position}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Рост/Вес</p>
-                  <p className="font-medium">
-                    {profile.height}см / {profile.weight}кг
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Предпочитаемая нога</p>
-                  <p className="font-medium">{profile.preferred_foot}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Опыт</p>
-                  <p className="font-medium">{profile.experience_years} лет</p>
-                </div>
-              </div>
-            ) : (
-              <p className="text-gray-600">Создайте профиль, чтобы начать</p>
-            )}
+    <div className="bg-app">
+      <section className="py-8 sm:py-10">
+        <div className="app-container space-y-8">
+          {/* Заголовок */}
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold text-slate-50 dark:text-slate-50 sm:text-3xl">
+              Добро пожаловать, {user?.full_name || "игрок"}!
+            </h1>
+            <p className="text-sm text-slate-400">
+              Управляй своим профилем, загружай видео и следи за оценками.
+            </p>
           </div>
 
-          {/* Videos Section */}
+          {/* Верхние карточки статистики – адаптивная сетка */}
+          <div className="grid gap-4 md:grid-cols-4 sm:grid-cols-2">
+            <StatCard
+              title="Профиль"
+              value={stats.profileCompleted ? "Заполнен" : "Не заполнен"}
+              description={
+                stats.profileCompleted
+                  ? "Ты готов показывать себя скаутам."
+                  : "Заполни профиль, чтобы быть заметнее."
+              }
+              icon="👤"
+              accent={stats.profileCompleted ? "Готов к просмотру" : "Важно"}
+            />
+            <StatCard
+              title="Видео"
+              value={`${stats.videosCount}/2`}
+              description="Рекомендуется минимум 2 видео."
+              icon="🎥"
+            />
+            <StatCard
+              title="Средний рейтинг"
+              value={stats.averageRating ? `${stats.averageRating}/10` : "—"}
+              description={
+                stats.averageRating ? "Твой общий рейтинг" : "Пока нет оценок"
+              }
+              icon="⭐"
+            />
+            <StatCard
+              title="Оценки"
+              value={stats.ratingsCount || 0}
+              description="Сколько раз тебя оценили"
+              icon="📊"
+            />
+          </div>
+
+          {/* Нижние блоки 2-колоночная сетка */}
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div className="card lg:col-span-2 space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold text-slate-50">
+                  Профиль игрока
+                </h2>
+                <Link
+                  to="/profile"
+                  className="btn-primary px-3 py-1.5 text-xs sm:text-sm"
+                >
+                  {stats.profileCompleted ? "Редактировать" : "Создать профиль"}
+                </Link>
+              </div>
+              <p className="text-sm text-slate-400">
+                Заполни данные о позиции, клубе, росте, весе и сильных сторонах.
+                Это то, что первым видят скауты.
+              </p>
+            </div>
+
+            <div className="card space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold text-slate-50">
+                  Мои видео
+                </h2>
+                <Link
+                  to="/upload-video"
+                  className="btn-primary px-3 py-1.5 text-xs sm:text-sm"
+                >
+                  Загрузить видео
+                </Link>
+              </div>
+              <p className="text-sm text-slate-400">
+                Добавь матчи или хайлайты. Краткое описание поможет скауту
+                понять контекст эпизода.
+              </p>
+            </div>
+          </div>
+
+          {/* Блок с последними оценками – на будущее */}
           <div className="card">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Мои видео</h2>
-              <Link to="/upload-video" className="btn-primary">
-                Загрузить видео
-              </Link>
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <h2 className="text-lg font-semibold text-slate-50">
+                Последние оценки
+              </h2>
+              <span className="text-xs text-slate-400">
+                Оценок пока нет — всё впереди.
+              </span>
             </div>
-
-            {videos.length > 0 ? (
-              <div className="grid gap-4">
-                {videos.map((video) => (
-                  <div key={video.id} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium">{video.title}</h3>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {video.description}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-2">
-                          Загружено:{" "}
-                          {new Date(video.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <a
-                        href={video.video_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn-secondary text-sm"
-                      >
-                        Смотреть
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-600">Видео не загружены</p>
-            )}
+            <p className="text-sm text-slate-400">
+              Как только скауты начнут оценивать твои видео, здесь появится
+              детальная статистика по каждому матчу.
+            </p>
           </div>
         </div>
-
-        {/* Ratings Section */}
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-6">Последние оценки</h2>
-
-          {ratings.length > 0 ? (
-            <div className="space-y-4">
-              {ratings.slice(0, 5).map((rating) => (
-                <div key={rating.id} className="border-b pb-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <p className="font-medium">{rating.rater_name}</p>
-                      <p className="text-xs text-gray-500">
-                        {rating.rater_role}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-lg">
-                        {rating.overall_rating}/10
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>Скорость: {rating.speed}/10</div>
-                    <div>Дриблинг: {rating.dribbling}/10</div>
-                    <div>Передачи: {rating.passing}/10</div>
-                    <div>Удары: {rating.shooting}/10</div>
-                    <div>Защита: {rating.defending}/10</div>
-                  </div>
-
-                  {rating.comments && (
-                    <p className="text-sm text-gray-600 mt-2 italic">
-                      "{rating.comments}"
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-600">Оценок пока нет</p>
-          )}
-        </div>
-      </div>
+      </section>
     </div>
   );
 };

@@ -1,82 +1,85 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import api from "../services/api";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
+
+// ВАЖНО: здесь уже есть /api
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userData = localStorage.getItem("user");
-
-    if (token && userData) {
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      setUser(JSON.parse(userData));
+    const stored = localStorage.getItem("scoutkz_auth");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setUser(parsed.user);
+        axios.defaults.headers.common.Authorization = `Bearer ${parsed.token}`;
+      } catch {
+        localStorage.removeItem("scoutkz_auth");
+      }
     }
-    setLoading(false);
+    setInitialized(true);
   }, []);
 
-  const login = async (phone, password) => {
+  const saveAuth = (data) => {
+    const { token, user } = data;
+    setUser(user);
+    axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+    localStorage.setItem("scoutkz_auth", JSON.stringify({ token, user }));
+  };
+
+  const clearAuth = () => {
+    setUser(null);
+    delete axios.defaults.headers.common.Authorization;
+    localStorage.removeItem("scoutkz_auth");
+  };
+
+  // LOGIN
+  const login = async (identifier, password) => {
     try {
-      const response = await api.post("/auth/login", { phone, password });
-      const { token, user } = response.data;
+      const res = await axios.post(`${API_BASE}/auth/login`, {
+        identifier,
+        password,
+      }); // -> http://localhost:5000/api/auth/login
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      setUser(user);
-
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || "Ошибка входа",
-      };
+      saveAuth(res.data);
+      return { success: true, user: res.data.user };
+    } catch (err) {
+      const msg =
+        err.response?.data?.error || "Не удалось войти. Проверьте данные.";
+      return { success: false, error: msg };
     }
   };
 
-  const register = async (userData) => {
+  // REGISTER
+  const register = async (payload) => {
     try {
-      const response = await api.post("/auth/register", userData);
-      const { token, user } = response.data;
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      setUser(user);
-
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || "Ошибка регистрации",
-      };
+      const res = await axios.post(`${API_BASE}/auth/register`, payload); // -> http://localhost:5000/api/auth/register
+      saveAuth(res.data);
+      return { success: true, user: res.data.user };
+    } catch (err) {
+      const msg = err.response?.data?.error || "Не удалось зарегистрироваться.";
+      return { success: false, error: msg };
     }
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    delete api.defaults.headers.common["Authorization"];
-    setUser(null);
+    clearAuth();
+    toast.success("Вы вышли из аккаунта");
   };
 
   const value = {
     user,
+    initialized,
     login,
     register,
     logout,
-    loading,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

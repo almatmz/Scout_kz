@@ -2,21 +2,89 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom styles */
-@layer components {
-  .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200;
-  }
+/* Цветовые токены – через классы */
+:root {
+  --bg-surface-dark: #020617; /* slate-950 */
+  --bg-surface-light: #f9fafb; /* gray-50 */
+  --fg-dark: #e5e7eb; /* gray-200 */
+  --fg-light: #0f172a; /* slate-900 */
+}
 
-  .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200;
-  }
+body {
+  @apply antialiased;
+}
 
-  .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
-  }
+/* Тема по классу на html: .dark или без */
+.bg-surface {
+  @apply bg-slate-950 text-slate-50;
+}
+html:not(.dark) .bg-surface {
+  @apply bg-slate-50 text-slate-900;
+}
 
-  .card {
-    @apply bg-white rounded-lg shadow-md p-6;
-  }
+/* Карточки */
+.card {
+  @apply rounded-2xl border px-6 py-6 shadow-2xl backdrop-blur-xl;
+  @apply border-slate-800/80 bg-slate-900/80 text-slate-50;
+}
+html:not(.dark) .card {
+  @apply border-slate-200 bg-white text-slate-900 shadow-lg;
+}
+
+/* Inputs */
+.input-field {
+  @apply block w-full rounded-xl border px-4 py-2.5 text-sm shadow-sm outline-none transition;
+  @apply border-slate-700 bg-slate-900/60 text-slate-50 placeholder-slate-500;
+  @apply focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40;
+}
+html:not(.dark) .input-field {
+  @apply border-slate-300 bg-white text-slate-900 placeholder-slate-400;
+}
+
+/* Buttons */
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold shadow-lg transition;
+  @apply bg-emerald-500 text-slate-950 shadow-emerald-500/20 hover:bg-emerald-400;
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2;
+  @apply focus-visible:ring-offset-slate-950;
+}
+html:not(.dark) .btn-primary {
+  @apply focus-visible:ring-offset-slate-50;
+}
+
+.btn-ghost {
+  @apply inline-flex items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium transition;
+  @apply border-slate-700 bg-slate-900/40 text-slate-200 hover:bg-slate-800/80;
+}
+html:not(.dark) .btn-ghost {
+  @apply border-slate-300 bg-white text-slate-700 hover:bg-slate-100;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-slate-950;
+}
+html:not(.dark) ::-webkit-scrollbar-track {
+  @apply bg-slate-100;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-700 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-500;
+}
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  @apply bg-slate-400;
+}
+
+/* Оболочка */
+.page-shell {
+  @apply min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950;
+}
+html:not(.dark) .page-shell {
+  @apply bg-gradient-to-b from-slate-50 via-white to-slate-100;
 }

@@ -2,12 +2,18 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import toast from "react-hot-toast";
+import AuthLayout from "../components/AuthLayout";
+import FormField from "../components/FormField";
+import PasswordField from "../components/PasswordFields";
+import RoleToggle from "../components/RoleToggle";
 
 const Register = () => {
   const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
     phone: "",
     password: "",
-    full_name: "",
+    confirmPassword: "",
     role: "player",
   });
   const [loading, setLoading] = useState(false);
@@ -15,147 +21,135 @@ const Register = () => {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (formData.password.length < 6) {
+      toast.error("Пароль должен быть минимум 6 символов");
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Пароли не совпадают");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const result = await register(formData);
+      const payload = {
+        full_name: formData.full_name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        password: formData.password,
+        role: formData.role,
+      };
+
+      const result = await register(payload);
 
       if (result.success) {
         toast.success("Регистрация успешна!");
-        if (formData.role === "player") {
-          navigate("/player-dashboard");
-        } else {
+        if (payload.role === "scout" || payload.role === "coach") {
           navigate("/scout-dashboard");
+        } else {
+          navigate("/player-dashboard");
         }
       } else {
-        toast.error(result.error);
+        toast.error(result.error || "Не удалось зарегистрироваться");
       }
-    } catch (error) {
-      toast.error("Произошла ошибка");
+    } catch {
+      toast.error("Произошла ошибка. Попробуйте еще раз.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Создать аккаунт
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="full_name"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Полное имя
-              </label>
-              <input
-                id="full_name"
-                name="full_name"
-                type="text"
-                required
-                className="input-field"
-                value={formData.full_name}
-                onChange={handleChange}
-              />
-            </div>
+    <AuthLayout
+      title="Создать аккаунт"
+      subtitle="Зарегистрируйтесь как игрок, родитель, скаут или тренер."
+    >
+      <form className="space-y-5" onSubmit={handleSubmit}>
+        <FormField
+          label="Полное имя"
+          htmlFor="full_name"
+          type="text"
+          placeholder="Almat Muzdybay"
+          required
+          value={formData.full_name}
+          onChange={handleChange}
+          autoComplete="name"
+        />
 
-            <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Номер телефона
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                placeholder="+77771234567"
-                required
-                className="input-field"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-            </div>
+        <FormField
+          label="Email"
+          htmlFor="email"
+          type="email"
+          placeholder="you@mail.kz"
+          required
+          value={formData.email}
+          onChange={handleChange}
+          autoComplete="email"
+          helpText="Email поможет для входа и восстановления доступа."
+        />
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Пароль (минимум 6 символов)
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="input-field"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
+        <FormField
+          label="Номер телефона"
+          htmlFor="phone"
+          type="tel"
+          placeholder="+7 777 123 45 67"
+          required
+          value={formData.phone}
+          onChange={handleChange}
+          autoComplete="tel"
+        />
 
-            <div>
-              <label
-                htmlFor="role"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Роль
-              </label>
-              <select
-                id="role"
-                name="role"
-                className="input-field"
-                value={formData.role}
-                onChange={handleChange}
-              >
-                <option value="player">Игрок</option>
-                <option value="parent">Родитель</option>
-                <option value="scout">Скаут</option>
-                <option value="coach">Тренер</option>
-              </select>
-            </div>
-          </div>
+        <PasswordField
+          label="Пароль"
+          htmlFor="password"
+          placeholder="Минимум 6 символов"
+          required
+          value={formData.password}
+          onChange={handleChange}
+          autoComplete="new-password"
+        />
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full btn-primary disabled:opacity-50"
-            >
-              {loading ? "Регистрация..." : "Зарегистрироваться"}
-            </button>
-          </div>
+        <PasswordField
+          label="Повторите пароль"
+          htmlFor="confirmPassword"
+          placeholder="Введите пароль ещё раз"
+          required
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          autoComplete="new-password"
+        />
 
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Уже есть аккаунт?{" "}
-              <Link
-                to="/login"
-                className="text-primary-600 hover:text-primary-700"
-              >
-                Войти
-              </Link>
-            </p>
-          </div>
-        </form>
-      </div>
-    </div>
+        <RoleToggle value={formData.role} onChange={handleChange} />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-2 w-full btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {loading ? "Создаем аккаунт..." : "Зарегистрироваться"}
+        </button>
+
+        <p className="text-center text-sm text-slate-300 dark:text-slate-300">
+          Уже есть аккаунт?{" "}
+          <Link
+            to="/login"
+            className="font-medium text-emerald-300 hover:text-emerald-200"
+          >
+            Войти
+          </Link>
+        </p>
+      </form>
+    </AuthLayout>
   );
 };
 

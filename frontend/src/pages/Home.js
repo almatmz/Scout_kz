@@ -1,110 +1,81 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Play, Users, Award, Zap } from "lucide-react";
 
 const Home = () => {
   return (
-    <div>
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-600 to-primary-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-20">
-          <div className="text-center">
-            <h1 className="text-5xl font-bold mb-6">
-              Дай себе шанс — загрузи видео, и тебя увидят
+    <div className="page-shell">
+      <div className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 lg:px-8">
+        <section className="grid gap-10 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:items-center">
+          <div className="space-y-6">
+            <h1 className="text-4xl font-bold tracking-tight text-slate-50 sm:text-5xl lg:text-6xl">
+              Дай себе шанс —{" "}
+              <span className="bg-gradient-to-r from-emerald-300 via-cyan-300 to-sky-300 bg-clip-text text-transparent">
+                загрузи видео,
+              </span>{" "}
+              и тебя увидят.
             </h1>
-            <p className="text-xl mb-8 text-primary-100 max-w-3xl mx-auto">
-              Scout.kz — это цифровая платформа для поиска молодых футбольных
-              талантов в Казахстане. Покажи свои навыки и получи возможность
-              быть замеченным профессиональными скаутами.
+            <p className="max-w-xl text-base text-slate-300 sm:text-lg">
+              Scout.kz — цифровая платформа для поиска молодых футбольных
+              талантов в Казахстане. Загружай свои матчи и хайлайты, получай
+              оценки от скаутов и тренеров и будь замечен.
             </p>
-            <div className="space-x-4">
-              <Link
-                to="/register"
-                className="bg-white text-primary-600 font-bold py-3 px-8 rounded-lg hover:bg-gray-100 transition duration-200"
-              >
+            <div className="flex flex-wrap gap-3">
+              <Link to="/register" className="btn-primary">
                 Зарегистрироваться
               </Link>
               <Link
                 to="/login"
-                className="border-2 border-white text-white font-bold py-3 px-8 rounded-lg hover:bg-white hover:text-primary-600 transition duration-200"
+                className="btn-ghost border-emerald-500/60 text-emerald-200 hover:border-emerald-400"
               >
                 Войти
               </Link>
             </div>
+            <dl className="mt-6 grid max-w-xl grid-cols-2 gap-4 text-sm text-slate-300">
+              <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+                <dt className="text-slate-400">Игроки</dt>
+                <dd className="mt-1 font-semibold text-slate-50">
+                  Создавай профиль, указывай позицию, клуб и статистику.
+                  Загружай свои лучшие моменты.
+                </dd>
+              </div>
+              <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+                <dt className="text-slate-400">Скауты и тренеры</dt>
+                <dd className="mt-1 font-semibold text-slate-50">
+                  Фильтруй игроков по городу, возрасту и позиции. Оценивай и
+                  добавляй комментарии.
+                </dd>
+              </div>
+            </dl>
           </div>
-        </div>
-      </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Как это работает
-            </h2>
-            <p className="text-lg text-gray-600">
-              Простой путь к профессиональному футболу
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="bg-primary-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-primary-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Регистрация</h3>
-              <p className="text-gray-600">
-                Создай аккаунт игрока и заполни свой профиль
+          <div className="relative">
+            <div className="absolute inset-0 -translate-x-10 translate-y-6 rounded-full bg-emerald-500/20 blur-3xl" />
+            <div className="relative rounded-3xl border border-slate-800 bg-slate-900/80 p-5 shadow-2xl shadow-slate-950/80">
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-emerald-300">
+                LIVE STATS
               </p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-primary-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Play className="w-8 h-8 text-primary-600" />
+              <div className="mt-4 space-y-3 text-sm text-slate-200">
+                <div className="flex items-center justify-between rounded-2xl bg-slate-900/80 px-4 py-3">
+                  <span>Загружено видео</span>
+                  <span className="font-semibold text-emerald-300">1 248+</span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl bg-slate-900/80 px-4 py-3">
+                  <span>Активных игроков</span>
+                  <span className="font-semibold text-emerald-300">670+</span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl bg-slate-900/80 px-4 py-3">
+                  <span>Скаутов и тренеров</span>
+                  <span className="font-semibold text-emerald-300">80+</span>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Загрузи видео</h3>
-              <p className="text-gray-600">
-                Покажи свои лучшие моменты в 1-2 минутном видео
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-primary-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Award className="w-8 h-8 text-primary-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Получи оценку</h3>
-              <p className="text-gray-600">
-                Скауты и тренеры оценят твои навыки
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-primary-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Zap className="w-8 h-8 text-primary-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Будь замечен</h3>
-              <p className="text-gray-600">
-                Получи приглашения от клубов и тренеров
+              <p className="mt-4 text-xs text-slate-500">
+                Цифры примерные, но настроение реальное:{" "}
+                <span className="text-emerald-300">будь замечен</span>.
               </p>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="bg-gray-50 py-20">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Готов показать свой талант?
-          </h2>
-          <p className="text-lg text-gray-600 mb-8">
-            Присоединяйся к сообществу молодых футболистов Казахстана
-          </p>
-          <Link to="/register" className="btn-primary text-lg py-3 px-8">
-            Начать сейчас
-          </Link>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 };
