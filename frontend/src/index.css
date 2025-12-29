@@ -2,62 +2,91 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Цветовые токены – через классы */
-:root {
-  --bg-surface-dark: #020617; /* slate-950 */
-  --bg-surface-light: #f9fafb; /* gray-50 */
-  --fg-dark: #e5e7eb; /* gray-200 */
-  --fg-light: #0f172a; /* slate-900 */
-}
-
 body {
   @apply antialiased;
 }
 
-/* Тема по классу на html: .dark или без */
+/* ГЛАВНЫЙ ФОН ПРИЛОЖЕНИЯ */
+.bg-app,
 .bg-surface {
   @apply bg-slate-950 text-slate-50;
 }
+html:not(.dark) .bg-app,
 html:not(.dark) .bg-surface {
-  @apply bg-slate-50 text-slate-900;
+  @apply bg-slate-100 text-slate-900;
+}
+
+/* Оболочка auth‑страниц */
+.page-shell {
+  @apply min-h-screen bg-slate-950 text-slate-50;
+}
+html:not(.dark) .page-shell {
+  @apply min-h-screen bg-slate-100 text-slate-900;
+}
+
+/* Контейнер: 92% ширины + max‑width */
+.app-container {
+  @apply mx-auto w-[92%] max-w-6xl px-0 sm:px-4;
 }
 
 /* Карточки */
 .card {
-  @apply rounded-2xl border px-6 py-6 shadow-2xl backdrop-blur-xl;
-  @apply border-slate-800/80 bg-slate-900/80 text-slate-50;
+  @apply rounded-2xl border px-6 py-6 shadow-2xl backdrop-blur-xl
+          border-slate-800/80 bg-slate-900/80 text-slate-50;
 }
 html:not(.dark) .card {
   @apply border-slate-200 bg-white text-slate-900 shadow-lg;
 }
 
-/* Inputs */
+/* Инпуты */
 .input-field {
-  @apply block w-full rounded-xl border px-4 py-2.5 text-sm shadow-sm outline-none transition;
-  @apply border-slate-700 bg-slate-900/60 text-slate-50 placeholder-slate-500;
-  @apply focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40;
+  @apply block w-full rounded-xl border px-4 py-2.5 text-sm shadow-sm outline-none transition
+          border-slate-700 bg-slate-900/60 text-slate-50 placeholder-slate-500
+          focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/40;
 }
 html:not(.dark) .input-field {
   @apply border-slate-300 bg-white text-slate-900 placeholder-slate-400;
 }
 
-/* Buttons */
+/* Кнопки */
 .btn-primary {
-  @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold shadow-lg transition;
-  @apply bg-emerald-500 text-slate-950 shadow-emerald-500/20 hover:bg-emerald-400;
-  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2;
-  @apply focus-visible:ring-offset-slate-950;
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold shadow-lg transition
+          bg-emerald-500 text-slate-950 shadow-emerald-500/20 hover:bg-emerald-400
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2
+          focus-visible:ring-offset-slate-950;
 }
 html:not(.dark) .btn-primary {
-  @apply focus-visible:ring-offset-slate-50;
+  @apply focus-visible:ring-offset-slate-100;
 }
 
 .btn-ghost {
-  @apply inline-flex items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium transition;
-  @apply border-slate-700 bg-slate-900/40 text-slate-200 hover:bg-slate-800/80;
+  @apply inline-flex items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-medium transition
+          border-slate-700 bg-slate-900/40 text-slate-200 hover:bg-slate-800/80;
 }
 html:not(.dark) .btn-ghost {
   @apply border-slate-300 bg-white text-slate-700 hover:bg-slate-100;
+}
+
+/* Текстовые токены */
+.text-muted {
+  @apply text-slate-400;
+}
+html:not(.dark) .text-muted {
+  @apply text-slate-700;
+}
+
+.text-muted-soft {
+  @apply text-slate-500;
+}
+html:not(.dark) .text-muted-soft {
+  @apply text-slate-600;
+}
+
+.text-muted-weak {
+  @apply text-slate-500;
+}
+html:not(.dark) .text-muted-weak {
+  @apply text-slate-500;
 }
 
 /* Scrollbar */
@@ -79,12 +108,4 @@ html:not(.dark) ::-webkit-scrollbar-track {
 }
 html:not(.dark) ::-webkit-scrollbar-thumb {
   @apply bg-slate-400;
-}
-
-/* Оболочка */
-.page-shell {
-  @apply min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950;
-}
-html:not(.dark) .page-shell {
-  @apply bg-gradient-to-b from-slate-50 via-white to-slate-100;
 }

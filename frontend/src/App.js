@@ -26,7 +26,7 @@ function App() {
             <Toaster position="top-right" />
 
             <Routes>
-              {/* Auth pages – свой layout */}
+              {/* Auth pages – отдельный layout */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 
@@ -43,7 +43,7 @@ function App() {
                 }
               />
 
-              {/* Остальные страницы */}
+              {/* Дашборды и защищённые страницы */}
               <Route
                 path="/player-dashboard"
                 element={

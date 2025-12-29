@@ -20,7 +20,7 @@ const VideoUpload = () => {
 
   const fetchVideoCount = async () => {
     try {
-      const response = await api.get("/videos/my-videos");
+      const response = await api.get("api/videos/my-videos");
       setVideoCount(response.data.length);
     } catch (error) {
       console.error("Error fetching video count:", error);
@@ -71,7 +71,7 @@ const VideoUpload = () => {
       uploadData.append("title", formData.title);
       uploadData.append("description", formData.description);
 
-      await api.post("/videos/upload", uploadData, {
+      await api.post("api/videos/upload", uploadData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

@@ -14,19 +14,32 @@ const app = express();
 
 app.set("trust proxy", 1);
 
+// === CORS ===
+// Фронт у тебя на http://localhost:3000,
+// и он ходит на http://localhost:5000/api/...
+const corsOptions = {
+  origin: "http://localhost:3000",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Accept",
+  ],
+};
+
+app.use(cors(corsOptions));
+// разрешаем preflight для всех маршрутов
+app.options("*", cors(corsOptions));
+
 // Security middleware
 app.use(helmet());
-app.use(
-  cors({
-    origin: ["http://localhost:3000", "https://scout-kz.vercel.app"],
-    credentials: true,
-  })
-);
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per window
+  windowMs: 15 * 60 * 1000, // 15 минут
+  max: 100, // 100 запросов с IP за окно
 });
 app.use(limiter);
 
@@ -34,14 +47,15 @@ app.use(limiter);
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-// Routes
+// === ROUTES c префиксом /api ===
+// теперь реальный URL: http://localhost:5000/api/auth/login
 app.use("/api/auth", authRoutes);
 app.use("/api/players", playerRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/ratings", ratingRoutes);
 
 // Health check
-app.get("/health", (req, res) => {
+app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
