@@ -79,7 +79,7 @@ const Register = () => {
           label="Полное имя"
           htmlFor="full_name"
           type="text"
-          placeholder="Almat Muzdybay"
+          placeholder="Фамилия и Имя "
           required
           value={formData.full_name}
           onChange={handleChange}

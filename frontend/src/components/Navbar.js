@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { useTheme } from "../contexts/ThemeContext";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -105,16 +103,6 @@ const Navbar = () => {
 
         {/* Справа: тема + профиль / кнопки + бургер */}
         <div className="flex items-center gap-2">
-          {/* Тема */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="btn-ghost h-9 w-9 items-center justify-center rounded-full p-0 text-lg"
-            aria-label="Переключить тему"
-          >
-            {theme === "dark" ? "🌞" : "🌙"}
-          </button>
-
           {user ? (
             <>
               <div className="hidden items-center gap-3 rounded-full border border-slate-700 bg-slate-900/40 px-3 py-1.5 text-xs sm:flex">
