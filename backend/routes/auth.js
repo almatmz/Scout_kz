@@ -135,9 +135,7 @@ router.post("/login", async (req, res) => {
 
     const { identifier, password } = value;
 
-    // ---- HERE is the logic you asked about ----
     const user = await findUserByIdentifier(identifier);
-    // -------------------------------------------
 
     if (!user) {
       return res

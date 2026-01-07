@@ -206,4 +206,48 @@ router.delete("/:id", auth, async (req, res) => {
   }
 });
 
+// Update video title/description (only owner or admin)
+router.put("/:id", auth, async (req, res) => {
+  try {
+    const { title, description } = req.body;
+
+    const videoResult = await pool.query(
+      `
+      SELECT v.*, p.user_id 
+      FROM videos v 
+      JOIN players p ON v.player_id = p.id 
+      WHERE v.id = $1
+    `,
+      [req.params.id]
+    );
+
+    if (videoResult.rows.length === 0) {
+      return res.status(404).json({ error: "Видео не найдено" });
+    }
+
+    const video = videoResult.rows[0];
+
+    if (video.user_id !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Доступ запрещен" });
+    }
+
+    const updated = await pool.query(
+      `
+      UPDATE videos
+      SET title = COALESCE($1, title),
+          description = COALESCE($2, description),
+          updated_at = NOW()
+      WHERE id = $3
+      RETURNING *
+    `,
+      [title, description, req.params.id]
+    );
+
+    res.json({ message: "Видео обновлено", video: updated.rows[0] });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Ошибка сервера" });
+  }
+});
+
 module.exports = router;

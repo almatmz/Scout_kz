@@ -1,28 +1,52 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import api from "../services/api";
 
 const PlayerDashboard = () => {
   const { user } = useAuth();
 
-  // TODO: реальные данные с API
-  const stats = {
+  const [stats, setStats] = useState({
     profileCompleted: false,
     videosCount: 0,
     averageRating: null,
     ratingsCount: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  const loadStats = async () => {
+    try {
+      const res = await api.get("players/me/stats");
+      setStats(res.data);
+    } catch (err) {
+      console.error("Error loading stats:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh] bg-app">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-400"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-app">
+    <div className="bg-app min-h-[80vh]">
       <section className="py-8 sm:py-10">
         <div className="app-container space-y-8">
           {/* Заголовок */}
           <div className="space-y-1">
-            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50 sm:text-3xl">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-slate-50">
               Добро пожаловать, {user?.full_name || "игрок"}!
             </h1>
-            <p className="text-sm text-muted">
+            <p className="text-sm text-muted max-w-2xl">
               Управляй своим профилем, загружай видео и следи за оценками.
             </p>
           </div>
@@ -34,7 +58,7 @@ const PlayerDashboard = () => {
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-lg font-semibold">Профиль</h2>
                 <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-                  Важно
+                  {stats.profileCompleted ? "Готово" : "Важно"}
                 </span>
               </div>
               <p className="text-sm text-muted">
@@ -65,7 +89,9 @@ const PlayerDashboard = () => {
                 to="/upload-video"
                 className="btn-primary px-3 py-1.5 text-xs sm:text-sm"
               >
-                Загрузить видео
+                {stats.videosCount === 0
+                  ? "Загрузить видео"
+                  : "Управлять видео"}
               </Link>
             </div>
 
@@ -74,13 +100,26 @@ const PlayerDashboard = () => {
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-lg font-semibold">Средний рейтинг</h2>
               </div>
-              <p className="text-sm text-muted">
-                Как только скауты начнут оценивать твои видео, здесь появится
-                детальная статистика по каждому матчу.
-              </p>
-              <p className="text-sm text-muted-weak">
-                Пока нет оценок — всё впереди.
-              </p>
+              {stats.ratingsCount === 0 ? (
+                <>
+                  <p className="text-sm text-muted">
+                    Как только скауты начнут оценивать твои видео, здесь
+                    появится детальная статистика по каждому матчу.
+                  </p>
+                  <p className="text-sm text-muted-weak">
+                    Пока нет оценок — всё впереди.
+                  </p>
+                </>
+              ) : (
+                <div className="space-y-1">
+                  <p className="text-3xl font-bold text-emerald-400">
+                    {stats.averageRating}
+                  </p>
+                  <p className="text-xs text-muted-soft">
+                    Оценок: {stats.ratingsCount}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

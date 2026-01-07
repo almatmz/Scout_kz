@@ -28,7 +28,7 @@ const PlayerProfile = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await api.get("api/players/profile");
+      const response = await api.get("players/profile");
       setFormData({
         age: response.data.age || "",
         city: response.data.city || "",
@@ -59,7 +59,7 @@ const PlayerProfile = () => {
     setLoading(true);
 
     try {
-      await api.post("api/players/profile", formData);
+      await api.post("players/profile", formData);
       toast.success("Профиль сохранен!");
       navigate("/player-dashboard");
     } catch (error) {

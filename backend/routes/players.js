@@ -215,4 +215,59 @@ router.get(
   }
 );
 
+router.get("/me/stats", auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // does this user have a player profile?
+    const profileResult = await pool.query(
+      "SELECT id FROM players WHERE user_id = $1",
+      [userId]
+    );
+    const profileCompleted = profileResult.rows.length > 0;
+
+    let videosCount = 0;
+    let averageRating = null;
+    let ratingsCount = 0;
+
+    if (profileCompleted) {
+      const playerId = profileResult.rows[0].id;
+
+      // count videos
+      const videosResult = await pool.query(
+        "SELECT COUNT(*) FROM videos WHERE player_id = $1",
+        [playerId]
+      );
+      videosCount = parseInt(videosResult.rows[0].count, 10);
+
+      // ratings (если у тебя есть таблица ratings)
+      const ratingsResult = await pool.query(
+        `
+        SELECT 
+          COUNT(*) AS count,
+          AVG(overall_rating) AS avg
+        FROM ratings
+        WHERE player_id = $1
+        `,
+        [playerId]
+      );
+
+      ratingsCount = parseInt(ratingsResult.rows[0].count || 0, 10);
+      averageRating = ratingsResult.rows[0].avg
+        ? Number(ratingsResult.rows[0].avg).toFixed(1)
+        : null;
+    }
+
+    res.json({
+      profileCompleted,
+      videosCount,
+      averageRating,
+      ratingsCount,
+    });
+  } catch (error) {
+    console.error("Error getting player stats:", error);
+    res.status(500).json({ error: "Ошибка сервера" });
+  }
+});
+
 module.exports = router;
