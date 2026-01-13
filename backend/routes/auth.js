@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const pool = require("../config/database");
+const { auth } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -168,6 +169,97 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: "Ошибка сервера" });
+  }
+});
+
+router.get("/me", auth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, phone, email, full_name, role, organization, city, bio, created_at 
+       FROM users WHERE id = $1`,
+      [req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Пользователь не найден" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Ошибка сервера" });
+  }
+});
+
+// PUT /auth/profile - обновить профиль
+router.put("/profile", auth, async (req, res) => {
+  try {
+    const { full_name, email, organization, city, bio } = req.body;
+
+    const result = await pool.query(
+      `UPDATE users 
+       SET full_name = COALESCE($1, full_name),
+           email = COALESCE($2, email),
+           organization = $3,
+           city = $4,
+           bio = $5,
+           updated_at = NOW()
+       WHERE id = $6
+       RETURNING id, phone, email, full_name, role, organization, city, bio`,
+      [
+        full_name,
+        email,
+        organization || null,
+        city || null,
+        bio || null,
+        req.user.id,
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Пользователь не найден" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Ошибка обновления профиля" });
+  }
+});
+
+// Update user profile
+router.put("/profile", auth, async (req, res) => {
+  try {
+    const { full_name, email, organization, city, bio } = req.body;
+
+    const result = await pool.query(
+      `UPDATE users 
+       SET full_name = COALESCE($1, full_name),
+           email = COALESCE($2, email),
+           organization = $3,
+           city = $4,
+           bio = $5,
+           updated_at = NOW()
+       WHERE id = $6
+       RETURNING id, phone, email, full_name, role, organization, city, bio`,
+      [
+        full_name,
+        email,
+        organization || null,
+        city || null,
+        bio || null,
+        req.user.id,
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Пользователь не найден" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Ошибка обновления профиля" });
   }
 });
 
