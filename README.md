@@ -1,4 +1,4 @@
-# 🌍 Scout.kz
+# 🌍 Scout. kz
 
 **A modern web platform for scouting talents and opportunities.**
 
@@ -46,13 +46,13 @@ The system is built with a **Node+Express backend**, **PostgreSQL database**, an
 
 - `GET/POST /players/profile` – Player profile management
 - `GET /players` – List players (with filters)
-- `GET /players/:id` – Get specific player
+- `GET /players/: id` – Get specific player
 
 **Videos**
 
 - `POST /videos/upload` – Upload video
-- `GET /videos/my-videos` – Get user’s videos
-- `GET /videos/player/:id` – Get player’s videos
+- `GET /videos/my-videos` – Get user's videos
+- `GET /videos/player/:id` – Get player's videos
 
 **Ratings**
 
@@ -74,7 +74,205 @@ The system is built with a **Node+Express backend**, **PostgreSQL database**, an
 
 ---
 
-## 🧪 Testing the Application
+## 🛠 Local Development Setup
+
+You can run Scout.kz either with **Docker** (recommended) or manually.
+
+---
+
+## 🐳 Option 1: Docker Setup (Recommended)
+
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+- Local PostgreSQL with database `Scout_kz` (or use Docker PostgreSQL)
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/almatmz/Scout_kz.git
+cd Scout_kz
+```
+
+### 2. Create `.env` file in project root
+
+```env
+NODE_ENV=development
+PORT=5000
+
+# Database (use your local PostgreSQL credentials)
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+POSTGRES_DB=
+
+# JWT
+JWT_SECRET=
+JWT_EXPIRE=7d
+
+# Cloudinary (for video uploads)
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+# Frontend
+FRONTEND_URL=http://localhost:3000
+```
+
+### 3. Build and Run
+
+```bash
+# Build and start containers
+docker-compose up -d --build
+
+# View logs
+docker-compose logs -f
+
+# View specific service logs
+docker-compose logs -f backend
+docker-compose logs -f frontend
+```
+
+### 7. Access the Application
+
+| Service     | URL                       |
+| ----------- | ------------------------- |
+| Frontend    | http://localhost:3000     |
+| Backend API | http://localhost:5000/api |
+
+### Docker Commands Reference
+
+```bash
+# Start containers
+docker-compose up -d
+
+# Stop containers
+docker-compose down
+
+# Rebuild and start
+docker-compose up -d --build
+
+# View running containers
+docker-compose ps
+
+# View logs
+docker-compose logs -f
+
+# Restart a service
+docker-compose restart backend
+
+# Execute command in container
+docker-compose exec backend sh
+```
+
+---
+
+## Option 2: Manual Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/almatmz/Scout_kz.git
+cd Scout_kz
+```
+
+### 2. Backend Setup (/backend)
+
+Go to the backend folder:
+
+```bash
+cd backend
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create a `.env` file (in backend folder):
+
+```env
+PORT=5000
+DATABASE_URL=
+JWT_SECRET=
+JWT_EXPIRE=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+Make sure the PostgreSQL database exists:
+
+```bash
+createdb Scout_kz
+```
+
+Start the backend server:
+
+```bash
+npm run dev
+```
+
+By default the API will be available at: http://localhost:5000
+
+### 3. Frontend Setup (/frontend)
+
+In a new terminal, go to the frontend folder:
+
+```bash
+cd frontend
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create a `.env` file (in frontend folder):
+
+```env
+REACT_APP_API_BASE=http://localhost:5000
+```
+
+Start the React development server:
+
+```bash
+npm start
+```
+
+The app will be available at: http://localhost:3000
+
+---
+
+## 📁 Project Structure
+
+```
+Scout_kz/
+├── . env                    # Docker environment variables
+├── docker-compose.yml      # Docker Compose configuration
+├── README.md
+├── backend/
+│   ├── Dockerfile
+│   ├── . env                # Backend environment variables (manual setup)
+│   ├── package.json
+│   ├── server.js
+│   ├── config/
+│   ├── middleware/
+│   ├── routes/
+│   ├── scripts/
+│   └── uploads/
+└── frontend/
+    ├── Dockerfile
+    ├── .env                # Frontend environment variables
+    ├── package.json
+    ├── public/
+    └── src/
+```
+
+---
+
+## Testing the Application
 
 ### 1. Register Users
 
@@ -104,23 +302,23 @@ The system is built with a **Node+Express backend**, **PostgreSQL database**, an
 
 ---
 
-## 🎯 Key Features Explained
+## Key Features Explained
 
-### 🔐 Authentication System
+### Authentication System
 
 - Phone number + password authentication
 - JWT tokens with 7-day expiration
 - Role-based access control
 - Persistent login sessions
 
-### 🏃 Player Profile System
+### Player Profile System
 
 - Comprehensive profile with **physical stats**
 - Position, experience, club information
 - Bio section for personal description
 - Real-time profile updates
 
-### 🎥 Video Upload System
+### Video Upload System
 
 - Cloudinary integration for **reliable storage**
 - File size validation (100MB limit)
@@ -128,7 +326,7 @@ The system is built with a **Node+Express backend**, **PostgreSQL database**, an
 - Max **2 videos per player**
 - Progress tracking during upload
 
-### ⭐ Rating System
+### Rating System
 
 - 5 skill categories: **Speed, Dribbling, Passing, Shooting, Defending**
 - Overall rating (1–10 scale)
@@ -136,7 +334,7 @@ The system is built with a **Node+Express backend**, **PostgreSQL database**, an
 - Average rating calculation
 - Rating history tracking
 
-### 🔎 Search & Filter System
+### Search & Filter System
 
 - Text search by player name
 - Filter by **city, position, age range**
@@ -144,133 +342,30 @@ The system is built with a **Node+Express backend**, **PostgreSQL database**, an
 - Pagination support
 - Sort by rating
 
+## Available NPM Scripts
+
+### Backend (/backend)
+
+| Command       | Description                              |
+| ------------- | ---------------------------------------- |
+| `npm start`   | Start server in production mode          |
+| `npm run dev` | Start server with nodemon (auto-restart) |
+| `npm test`    | Run backend tests                        |
+
+### Frontend (/frontend)
+
+| Command         | Description             |
+| --------------- | ----------------------- |
+| `npm start`     | Start React dev server  |
+| `npm run build` | Create production build |
+| `npm test`      | Run frontend tests      |
+
 ---
 
-## 🛠 Local Development Setup
+## Environment Summary
 
-Follow these steps to run **Scout.kz** on your local machine.
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/almatmz/Scout_kz.git
-cd Scout_kz
-```
-
-2. Backend Setup (/backend)
-   Go to the backend folder:
-
-```bash
-cd backend
-```
-
-#### Install dependencies:
-
-```bash
-npm install
-```
-
-Create a .env file (in backend folder) and fill in your configuration:
-
-```
-NODE_ENV=development
-PORT=5000
-DATABASE_URL=your_database_url
-JWT_SECRET=your_jwt_secret_key_here_make_it_strong
-JWT_EXPIRE=7d
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-```
-
-#### Make sure the PostgreSQL database exists:
-
-```bash
-createdb scout_kz
-```
-
-### Start the backend server:
-
-```bash
-npm run dev
-```
-
-By default the API will be available at: http://localhost:5000
-
-### 3. Frontend Setup (/frontend)
-
-In a new terminal, go to the frontend folder:
-
-```bash
-cd frontend
-```
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Create a .env file (in frontend folder):
-
-```
-# Base URL of the backend API
-REACT_APP_API_BASE=http://localhost:5000
-```
-
-The api service in the frontend uses this base URL for all requests.
-
-#### Start the React development server:
-
-```bash
-npm start
-```
-
-The app will be available at: http://localhost:3000
-
-### 4. First-Time Usage Flow
-
-Register accounts
-
-Open http://localhost:3000/register
-
-Create:
-a Player account
-a Scout/Coach account
-Login as Player
-
-Go to http://localhost:3000/login
-Login with the player credentials.
-Create Player Profile
-
-Navigate to /profile
-Fill in all required fields and save.
-You will be redirected to the player dashboard.
-Upload Videos
-
-Navigate to /upload-video
-Upload up to 2 videos (max 100MB each)
-Add title and description for each video.
-Login as Scout/Coach
-
-Login with scout/coach credentials.
-
-Go to /players to browse players, view profiles and rate videos.
-
-### 5. Available NPM Scripts
-
-#### Backend (/backend)
-
-- npm start – start server in production mode
-- npm run dev – start server with nodemon (auto-restart on changes)
-- npm test – run backend tests (if configured)
-
-#### Frontend (/frontend)
-
-- npm start – start React dev server
-- npm run build – create production build
-- npm test – run frontend tests (if configured)
-
-### 6. Environment Summary
-
-![alt text](image.png)
+| Service    | Local URL             | Port |
+| ---------- | --------------------- | ---- |
+| Frontend   | http://localhost:3000 | 3000 |
+| Backend    | http://localhost:5000 | 5000 |
+| PostgreSQL | localhost             | 5432 |
