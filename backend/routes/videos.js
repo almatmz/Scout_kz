@@ -1,11 +1,15 @@
 const express = require("express");
 const multer = require("multer");
 const { v2: cloudinary } = require("cloudinary");
-const fs = require("fs");
+const streamifier = require("streamifier");
 const pool = require("../config/database");
 const { auth } = require("../middleware/auth");
 
 const router = express.Router();
+
+// Константы для лимитов
+const MAX_VIDEOS = 5;
+const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
 
 // Configure Cloudinary
 cloudinary.config({
@@ -14,19 +18,12 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Configure multer for file uploads (disk storage)
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // папка "uploads" должна существовать
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
+// Configure multer for memory storage (no disk)
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
-  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
+  limits: { fileSize: MAX_FILE_SIZE },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith("video/")) {
       cb(null, true);
@@ -48,46 +45,43 @@ router.post("/upload", auth, upload.single("video"), async (req, res) => {
     // Check if user has a player profile
     const playerCheck = await pool.query(
       "SELECT id FROM players WHERE user_id = $1",
-      [req.user.id]
+      [req.user.id],
     );
     if (playerCheck.rows.length === 0) {
-      // удаляем файл, если профиль не найден
-      fs.unlinkSync(req.file.path);
       return res.status(400).json({ error: "Сначала создайте профиль игрока" });
     }
 
     const playerId = playerCheck.rows[0].id;
 
-    // Check video limit (2 videos per player)
+    // Check video limit (5 videos per player)
     const videoCount = await pool.query(
       "SELECT COUNT(*) FROM videos WHERE player_id = $1",
-      [playerId]
+      [playerId],
     );
-    if (parseInt(videoCount.rows[0].count) >= 2) {
-      fs.unlinkSync(req.file.path);
-      return res.status(400).json({ error: "Максимум 2 видео на игрока" });
+    if (parseInt(videoCount.rows[0].count) >= MAX_VIDEOS) {
+      return res
+        .status(400)
+        .json({ error: `Максимум ${MAX_VIDEOS} видео на игрока` });
     }
 
-    // Upload to Cloudinary with stream
+    // Upload to Cloudinary directly from memory buffer
     const result = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           resource_type: "video",
           folder: "scout-kz/videos",
-          quality: "auto:good",
-          format: "mp4",
+          // Переносим обработку в асинхронный режим
+          eager: [{ quality: "auto:good", format: "mp4" }],
+          eager_async: true, // Это решает вашу ошибку
         },
         (error, result) => {
           if (error) reject(error);
           else resolve(result);
-        }
+        },
       );
 
-      fs.createReadStream(req.file.path).pipe(uploadStream);
+      streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
     });
-
-    // Удаляем временный файл после загрузки
-    fs.unlinkSync(req.file.path);
 
     // Save to database
     const videoRecord = await pool.query(
@@ -95,7 +89,7 @@ router.post("/upload", auth, upload.single("video"), async (req, res) => {
       INSERT INTO videos (player_id, title, description, video_url, cloudinary_id, duration, file_size)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
-    `,
+      `,
       [
         playerId,
         title || "Видео",
@@ -104,7 +98,7 @@ router.post("/upload", auth, upload.single("video"), async (req, res) => {
         result.public_id,
         result.duration || 0,
         result.bytes || 0,
-      ]
+      ],
     );
 
     res.status(201).json({
@@ -112,11 +106,10 @@ router.post("/upload", auth, upload.single("video"), async (req, res) => {
       video: videoRecord.rows[0],
     });
   } catch (error) {
-    console.error(error);
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path); // удаляем файл, если ошибка
-    }
-    res.status(500).json({ error: "Ошибка при загрузке видео" });
+    console.error("FULL ERROR:", error); // Посмотри это в терминале сервера
+    res
+      .status(500)
+      .json({ error: error.message || "Ошибка при загрузке видео" });
   }
 });
 
@@ -125,15 +118,15 @@ router.get("/my-videos", auth, async (req, res) => {
   try {
     const playerResult = await pool.query(
       "SELECT id FROM players WHERE user_id = $1",
-      [req.user.id]
+      [req.user.id],
     );
     if (playerResult.rows.length === 0) {
       return res.json([]);
     }
 
     const result = await pool.query(
-      `SELECT * FROM videos WHERE player_id = $1 ORDER BY created_at DESC`,
-      [playerResult.rows[0].id]
+      "SELECT * FROM videos WHERE player_id = $1 ORDER BY created_at DESC",
+      [playerResult.rows[0].id],
     );
 
     res.json(result.rows);
@@ -148,14 +141,14 @@ router.get("/player/:playerId", auth, async (req, res) => {
   try {
     const result = await pool.query(
       `
-      SELECT v.*, p.user_id, u.full_name 
+      SELECT v.*,p.user_id,u.full_name 
       FROM videos v
       JOIN players p ON v.player_id = p.id
       JOIN users u ON p.user_id = u.id
       WHERE v.player_id = $1
       ORDER BY v.created_at DESC
-    `,
-      [req.params.playerId]
+      `,
+      [req.params.playerId],
     );
 
     res.json(result.rows);
@@ -170,12 +163,12 @@ router.delete("/:id", auth, async (req, res) => {
   try {
     const videoResult = await pool.query(
       `
-      SELECT v.*, p.user_id 
+      SELECT v.*, p. user_id 
       FROM videos v 
       JOIN players p ON v.player_id = p.id 
       WHERE v.id = $1
-    `,
-      [req.params.id]
+      `,
+      [req.params.id],
     );
 
     if (videoResult.rows.length === 0) {
@@ -211,14 +204,19 @@ router.put("/:id", auth, async (req, res) => {
   try {
     const { title, description } = req.body;
 
+    const videoId = parseInt(req.params.id);
+    if (isNaN(videoId)) {
+      return res.status(400).json({ error: "Неверный ID видео" });
+    }
+
     const videoResult = await pool.query(
       `
       SELECT v.*, p.user_id 
       FROM videos v 
       JOIN players p ON v.player_id = p.id 
       WHERE v.id = $1
-    `,
-      [req.params.id]
+      `,
+      [videoId],
     );
 
     if (videoResult.rows.length === 0) {
@@ -231,21 +229,25 @@ router.put("/:id", auth, async (req, res) => {
       return res.status(403).json({ error: "Доступ запрещен" });
     }
 
+    const newTitle = title !== undefined ? title : video.title;
+    const newDescription =
+      description !== undefined ? description : video.description;
+
     const updated = await pool.query(
       `
       UPDATE videos
-      SET title = COALESCE($1, title),
-          description = COALESCE($2, description),
+      SET title = $1,
+          description = $2,
           updated_at = NOW()
       WHERE id = $3
       RETURNING *
-    `,
-      [title, description, req.params.id]
+      `,
+      [newTitle, newDescription, videoId],
     );
 
     res.json({ message: "Видео обновлено", video: updated.rows[0] });
   } catch (error) {
-    console.error(error);
+    console.error("Update video error:", error);
     res.status(500).json({ error: "Ошибка сервера" });
   }
 });

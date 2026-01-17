@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Play } from "lucide-react";
 
-const MAX_VIDEOS = 2;
+const MAX_VIDEOS = 5;
+const MAX_FILE_SIZE_MB = 500;
 
 const VideoUpload = () => {
   const [formData, setFormData] = useState({ title: "", description: "" });
@@ -17,6 +18,9 @@ const VideoUpload = () => {
     title: "",
     description: "",
   });
+
+  // Состояние для модального окна видео
+  const [watchingVideo, setWatchingVideo] = useState(null);
 
   const navigate = useNavigate();
 
@@ -46,8 +50,8 @@ const VideoUpload = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 100 * 1024 * 1024) {
-      toast.error("Файл слишком большой. Максимум 100MB");
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      toast.error(`Файл слишком большой.  Максимум ${MAX_FILE_SIZE_MB}MB`);
       return;
     }
     if (!file.type.startsWith("video/")) {
@@ -129,14 +133,48 @@ const VideoUpload = () => {
 
   const saveEdit = async (id) => {
     try {
-      await api.put(`videos/${id}`, editingData);
+      await api.put(`videos/${id}`, {
+        title: editingData.title,
+        description: editingData.description,
+      });
       toast.success("Видео обновлено");
       setEditingId(null);
+      setEditingData({ title: "", description: "" });
       await fetchMyVideos();
     } catch (error) {
+      console.error("Edit error:", error);
       toast.error(error.response?.data?.error || "Ошибка обновления видео");
     }
   };
+
+  // ---------- watch video ----------
+
+  const openVideo = (video) => {
+    setWatchingVideo(video);
+  };
+
+  const closeVideo = () => {
+    setWatchingVideo(null);
+  };
+
+  // Закрытие по клику на фон или по Escape
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        closeVideo();
+      }
+    };
+
+    if (watchingVideo) {
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden"; // Блокируем скролл
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
+    };
+  }, [watchingVideo]);
 
   // ---------- UI ----------
 
@@ -172,7 +210,7 @@ const VideoUpload = () => {
                   className="input-field"
                   value={formData.title}
                   onChange={handleChange}
-                  placeholder="Например: Мои лучшие голы"
+                  placeholder="Например:  Мои лучшие голы"
                   disabled={videoCount >= MAX_VIDEOS}
                 />
               </div>
@@ -213,7 +251,8 @@ const VideoUpload = () => {
                       />
                     </label>
                     <p className="text-sm text-muted mt-2">
-                      Максимум 100MB, рекомендуемая длительность 1–2 минуты
+                      Максимум {MAX_FILE_SIZE_MB}MB, рекомендуемая длительность
+                      1–2 минуты
                     </p>
                   </div>
                 ) : (
@@ -344,14 +383,14 @@ const VideoUpload = () => {
                             </p>
                           </div>
                           <div className="flex items-center gap-2 self-end sm:self-auto">
-                            <a
-                              href={v.video_url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="btn-secondary px-3 py-1 text-xs"
+                            <button
+                              type="button"
+                              onClick={() => openVideo(v)}
+                              className="btn-secondary px-3 py-1 text-xs flex items-center gap-1"
                             >
+                              <Play className="w-3 h-3" />
                               Смотреть
-                            </a>
+                            </button>
                             <button
                               type="button"
                               onClick={() => startEdit(v)}
@@ -377,6 +416,56 @@ const VideoUpload = () => {
           </div>
         </div>
       </div>
+
+      {/* Модальное окно для просмотра видео */}
+      {watchingVideo && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          onClick={closeVideo}
+        >
+          <div
+            className="relative w-full max-w-4xl mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Кнопка закрытия */}
+            <button
+              onClick={closeVideo}
+              className="absolute -top-10 right-0 text-white hover:text-red-400 transition-colors"
+            >
+              <X className="w-8 h-8" />
+            </button>
+
+            {/* Заголовок видео */}
+            <div className="mb-3">
+              <h3 className="text-xl font-semibold text-white">
+                {watchingVideo.title || "Без названия"}
+              </h3>
+              {watchingVideo.description && (
+                <p className="text-sm text-slate-300 mt-1">
+                  {watchingVideo.description}
+                </p>
+              )}
+            </div>
+
+            {/* Видео плеер */}
+            <div className="rounded-lg overflow-hidden bg-black">
+              <video
+                src={watchingVideo.video_url}
+                controls
+                autoPlay
+                className="w-full max-h-[70vh]"
+              >
+                Ваш браузер не поддерживает воспроизведение видео.
+              </video>
+            </div>
+
+            {/* Дата загрузки */}
+            <p className="text-xs text-slate-400 mt-2">
+              Загружено: {new Date(watchingVideo.created_at).toLocaleString()}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

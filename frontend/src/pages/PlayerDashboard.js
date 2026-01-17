@@ -43,7 +43,7 @@ const PlayerDashboard = () => {
         <div className="app-container space-y-8">
           {/* Заголовок */}
           <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-slate-50">
+            <h1 className="text-2xl sm: text-3xl font-semibold text-slate-50">
               Добро пожаловать, {user?.full_name || "игрок"}!
             </h1>
             <p className="text-sm text-muted max-w-2xl">
@@ -78,7 +78,7 @@ const PlayerDashboard = () => {
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-lg font-semibold">Мои видео</h2>
                 <span className="text-xs text-muted-soft">
-                  {stats.videosCount}/2
+                  {stats.videosCount}/5
                 </span>
               </div>
               <p className="text-sm text-muted">
@@ -87,7 +87,7 @@ const PlayerDashboard = () => {
               </p>
               <Link
                 to="/upload-video"
-                className="btn-primary px-3 py-1.5 text-xs sm:text-sm"
+                className="btn-primary px-3 py-1.5 text-xs sm: text-sm"
               >
                 {stats.videosCount === 0
                   ? "Загрузить видео"

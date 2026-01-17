@@ -26,9 +26,7 @@ const Navbar = () => {
             }`
           }
           onClick={closeMobile}
-        >
-          Главная
-        </NavLink>
+        ></NavLink>
       );
     }
 
@@ -140,10 +138,10 @@ const Navbar = () => {
                       {user.role === "scout"
                         ? "Скаут"
                         : user.role === "coach"
-                        ? "Тренер"
-                        : user.role === "player"
-                        ? "Игрок"
-                        : user.role}
+                          ? "Тренер"
+                          : user.role === "player"
+                            ? "Игрок"
+                            : user.role}
                     </span>
                   </div>
                 </div>
@@ -210,10 +208,10 @@ const Navbar = () => {
                         {user.role === "scout"
                           ? "Скаут"
                           : user.role === "coach"
-                          ? "Тренер"
-                          : user.role === "player"
-                          ? "Игрок"
-                          : user.role}
+                            ? "Тренер"
+                            : user.role === "player"
+                              ? "Игрок"
+                              : user.role}
                       </span>
                     </div>
                   </div>
