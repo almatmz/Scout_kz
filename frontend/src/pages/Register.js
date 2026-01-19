@@ -42,10 +42,20 @@ const Register = () => {
     setLoading(true);
 
     try {
+      // ✅ Format phone number - remove spaces and dashes
+      const formattedPhone = formData.phone.replace(/[\s-]/g, "");
+
+      // ✅ Validate phone format
+      if (!/^\+7\d{10}$/.test(formattedPhone)) {
+        toast.error("Номер телефона должен быть в формате +7XXXXXXXXXX");
+        setLoading(false);
+        return;
+      }
+
       const payload = {
         full_name: formData.full_name.trim(),
         email: formData.email.trim(),
-        phone: formData.phone.trim(),
+        phone: formattedPhone, // ✅ Use formatted phone
         password: formData.password,
         role: formData.role,
       };
@@ -62,7 +72,8 @@ const Register = () => {
       } else {
         toast.error(result.error || "Не удалось зарегистрироваться");
       }
-    } catch {
+    } catch (error) {
+      console.error("Registration error:", error);
       toast.error("Произошла ошибка. Попробуйте еще раз.");
     } finally {
       setLoading(false);

@@ -1,39 +1,27 @@
-const jwt = require("jsonwebtoken");
-const pool = require("../config/database");
+const authService = require("../services/auth.service");
+const { UnauthorizedError, ForbiddenError } = require("../utils/errors");
 
 const auth = async (req, res, next) => {
   try {
     const token = req.header("Authorization")?.replace("Bearer ", "");
-
     if (!token) {
-      return res
-        .status(401)
-        .json({ error: "Access denied. No token provided." });
+      throw new UnauthorizedError("Access denied. No token provided.");
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const result = await pool.query(
-      "SELECT id, phone, role FROM users WHERE id = $1",
-      [decoded.id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(401).json({ error: "Token is not valid." });
-    }
-
-    req.user = result.rows[0];
+    const user = await authService.verifyToken(token);
+    req.user = { id: user.id, role: user.role, phone: user.phone };
     next();
   } catch (error) {
-    res.status(401).json({ error: "Token is not valid." });
+    next(error);
   }
 };
 
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return res
-        .status(403)
-        .json({ error: "Access denied. Insufficient permissions." });
+      return next(
+        new ForbiddenError("Access denied. Insufficient permissions."),
+      );
     }
     next();
   };
