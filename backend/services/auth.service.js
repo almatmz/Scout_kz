@@ -48,7 +48,7 @@ class AuthService {
       throw new UnauthorizedError("Неверный номер телефона / email или пароль");
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
       throw new UnauthorizedError("Неверный номер телефона / email или пароль");
     }
@@ -67,7 +67,9 @@ class AuthService {
   }
 
   generateToken(userId) {
-    return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+    console.log('JWT_SECRET:', process.env.JWT_SECRET);
+    console.log('JWT_EXPIRE:', process.env.JWT_EXPIRE);
+    return jwt.sign({ id: userId }, process.env.JWT_SECRET || 'fallback-secret', {
       expiresIn: process.env.JWT_EXPIRE || "7d",
     });
   }

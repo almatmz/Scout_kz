@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
-import { Upload, X, Play } from "lucide-react";
+import { Upload, X, Play, Brain } from "lucide-react";
 
 const MAX_VIDEOS = 5;
 const MAX_FILE_SIZE_MB = 500;
@@ -393,6 +393,14 @@ const VideoUpload = () => {
                             </button>
                             <button
                               type="button"
+                              onClick={() => navigate(`/ai-analysis/${v.id}`)}
+                              className="btn-secondary px-3 py-1 text-xs flex items-center gap-1 bg-purple-600 hover:bg-purple-700"
+                            >
+                              <Brain className="w-3 h-3" />
+                              ИИ-Анализ
+                            </button>
+                            <button
+                              type="button"
                               onClick={() => startEdit(v)}
                               className="btn-secondary px-3 py-1 text-xs"
                             >
@@ -427,6 +435,16 @@ const VideoUpload = () => {
             className="relative w-full max-w-4xl mx-4"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Кнопка ИИ-анализа */}
+            <button
+              type="button"
+              onClick={() => navigate(`/ai-analysis/${watchingVideo.id}`)}
+              className="absolute top-0 left-0 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <Brain className="w-4 h-4" />
+              ИИ-Анализ
+            </button>
+
             {/* Кнопка закрытия */}
             <button
               onClick={closeVideo}

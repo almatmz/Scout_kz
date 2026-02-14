@@ -8,13 +8,14 @@ const authRoutes = require("./routes/auth");
 const playerRoutes = require("./routes/players");
 const videoRoutes = require("./routes/videos");
 const ratingRoutes = require("./routes/ratings");
+const aiAnalysisRoutes = require("./routes/aiAnalysis");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
 app.set("trust proxy", 1);
 
-const allowedOrigins = ["http://localhost:3000", "https://scout-kz.vercel.app"];
+const allowedOrigins = ["http://localhost:3000", "http://localhost:3001", "https://scout-kz.vercel.app"];
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -68,6 +69,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/players", playerRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/ratings", ratingRoutes);
+app.use("/api/ai-analysis", aiAnalysisRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

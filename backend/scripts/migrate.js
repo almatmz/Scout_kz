@@ -1,8 +1,19 @@
-const pool = require("../config/database");
+const db = require("../config/database");
 
 const createTables = async () => {
   try {
-    await pool.query(`
+    // Инициализируем базу данных
+    await db.initDatabase();
+    
+    // Если используем memory storage, таблицы не нужны
+    if (db.useMemoryStorage()) {
+      console.log("📦 Using memory storage - tables not needed");
+      console.log("✅ Database initialized (memory mode)");
+      return;
+    }
+
+    // Создаем таблицы в PostgreSQL
+    await db.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         phone VARCHAR(20) UNIQUE NOT NULL,
@@ -15,8 +26,10 @@ const createTables = async () => {
         bio TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
+      )
+    `);
 
+    await db.query(`
       CREATE TABLE IF NOT EXISTS players (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -31,8 +44,10 @@ const createTables = async () => {
         bio TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
+      )
+    `);
 
+    await db.query(`
       CREATE TABLE IF NOT EXISTS videos (
         id SERIAL PRIMARY KEY,
         player_id INTEGER REFERENCES players(id) ON DELETE CASCADE,
@@ -44,8 +59,10 @@ const createTables = async () => {
         file_size BIGINT DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
+      )
+    `);
 
+    await db.query(`
       CREATE TABLE IF NOT EXISTS ratings (
         id SERIAL PRIMARY KEY,
         player_id INTEGER REFERENCES players(id) ON DELETE CASCADE,
@@ -60,12 +77,13 @@ const createTables = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(player_id, rater_id)
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_users_email ON users(LOWER(email));
-      CREATE INDEX IF NOT EXISTS idx_players_city_pos ON players(city, position);
+      )
     `);
-    console.log("Database initialized");
+
+    await db.query(`CREATE INDEX IF NOT EXISTS idx_users_email ON users(LOWER(email))`);
+    await db.query(`CREATE INDEX IF NOT EXISTS idx_players_city_pos ON players(city, position)`);
+
+    console.log("✅ Database initialized (PostgreSQL mode)");
   } catch (err) {
     console.error("Migration error:", err);
   } finally {

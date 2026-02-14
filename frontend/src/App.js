@@ -17,6 +17,7 @@ import ScoutProfile from "./pages/ScoutProfile";
 import VideoUpload from "./pages/VideoUpload";
 import PlayersListing from "./pages/PlayersListing";
 import PlayerDetails from "./pages/PlayerDetails";
+import AIAnalysis from "./pages/AIAnalysis";
 
 // Компонент для выбора профиля в зависимости от роли
 const ProfileRouter = () => {
@@ -145,6 +146,21 @@ const AppRoutes = () => {
               <main>
                 <ProtectedRoute roles={["scout", "coach", "admin"]}>
                   <PlayerDetails />
+                </ProtectedRoute>
+              </main>
+            </>
+          }
+        />
+
+        {/* AI Analysis - для игроков и скаутов */}
+        <Route
+          path="/ai-analysis/:videoId"
+          element={
+            <>
+              <Navbar />
+              <main>
+                <ProtectedRoute roles={["player", "scout", "coach"]}>
+                  <AIAnalysis />
                 </ProtectedRoute>
               </main>
             </>
