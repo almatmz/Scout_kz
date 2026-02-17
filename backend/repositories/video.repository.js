@@ -20,8 +20,8 @@ class VideoRepository {
         data.description,
         data.video_url,
         data.cloudinary_id,
-        data.duration,
-        data.file_size,
+        Math.round(data.duration),
+        Math.round(data.file_size),
       ],
     );
     return result.rows[0];
