@@ -25,17 +25,14 @@ const app = express();
 
 app.set("trust proxy", 1);
 
-const allowedOrigins = ["http://localhost:3000", "https://scout-kz.vercel.app"];
-
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or Postman)
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.log("Blocked by CORS:", origin);
+      console.error(`🚨 CORS Error: Origin ${origin} is not allowed.`);
       callback(new Error("Not allowed by CORS"));
     }
   },
