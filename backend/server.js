@@ -10,6 +10,17 @@ const videoRoutes = require("./routes/videos");
 const ratingRoutes = require("./routes/ratings");
 const errorHandler = require("./middleware/errorHandler");
 
+const pool = require("./config/database");
+
+(async () => {
+  try {
+    const res = await pool.query("SELECT NOW()");
+    console.log("DB connected:", res.rows);
+  } catch (err) {
+    console.error("DB connection error:", err);
+  }
+})();
+
 const app = express();
 
 app.set("trust proxy", 1);
