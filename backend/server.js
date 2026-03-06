@@ -25,6 +25,12 @@ const app = express();
 
 app.set("trust proxy", 1);
 
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+  : ["http://localhost:3000"];
+
+console.log(" Loaded allowed origins:", allowedOrigins);
+
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
